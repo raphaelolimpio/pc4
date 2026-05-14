@@ -1,6 +1,12 @@
 import type {NextConfig} from 'next';
 
+const repoName = 'pc2';
+
 const nextConfig: NextConfig = {
+  output: 'export',
+  basePath: `/${repoName}`,
+  assetPrefix: `/${repoName}/`,
+  trailingSlash: true,
   /* config options here */
   typescript: {
     ignoreBuildErrors: true,
