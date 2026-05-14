@@ -21,7 +21,7 @@ import Link from "next/link"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
-import { suggestRehabilitationActivities, type SuggestedActivity } from "@/ai/flows/suggest-rehabilitation-activities"
+import { suggestRehabilitationActivities } from "@/ai/flows/suggest-rehabilitation-activities"
 
 const MOTOR_DIFFICULTIES = ["Fraqueza em membros inferiores", "Dificuldade de equilíbrio", "Espasticidade", "Amplitude de movimento reduzida"]
 const COGNITIVE_DIFFICULTIES = ["Lapsos de memória", "Dificuldade de concentração", "Desorientação temporal", "Afasia de expressão"]
