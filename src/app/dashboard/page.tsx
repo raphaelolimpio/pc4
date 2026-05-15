@@ -16,62 +16,66 @@ import {
 } from "recharts"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-
-const stats = [
-  {
-    title: "Total de Pacientes",
-    value: "128",
-    change: "+12% este mês",
-    icon: Users,
-    color: "text-blue-600",
-    bg: "bg-blue-100",
-  },
-  {
-    title: "Avaliações Pendentes",
-    value: "14",
-    change: "3 urgentes",
-    icon: ClipboardCheck,
-    color: "text-amber-600",
-    bg: "bg-amber-100",
-  },
-  {
-    title: "Atividades Concluídas",
-    value: "84%",
-    change: "+5% vs semana passada",
-    icon: Activity,
-    color: "text-teal-600",
-    bg: "bg-teal-100",
-  },
-  {
-    title: "Consultas Hoje",
-    value: "8",
-    change: "Próxima às 14:00",
-    icon: Calendar,
-    color: "text-purple-600",
-    bg: "bg-purple-100",
-  },
-]
-
-const chartData = [
-  { name: "Seg", avaliacoes: 4, atividades: 24 },
-  { name: "Ter", avaliacoes: 7, atividades: 38 },
-  { name: "Qua", avaliacoes: 5, atividades: 32 },
-  { name: "Qui", avaliacoes: 8, atividades: 45 },
-  { name: "Sex", avaliacoes: 6, atividades: 40 },
-]
+import { getPatientStatistics, getAllPatients } from "@/lib/patients-mock"
 
 export default function Dashboard() {
+  const stats_data = getPatientStatistics()
+  const patients = getAllPatients()
+
+  const stats = [
+    {
+      title: "Total de Pacientes",
+      value: stats_data.total.toString(),
+      change: `${stats_data.active} ativos`,
+      icon: Users,
+      color: "text-blue-600",
+      bg: "bg-blue-100",
+    },
+    {
+      title: "Avaliações Pendentes",
+      value: stats_data.active.toString(),
+      change: "Em acompanhamento",
+      icon: ClipboardCheck,
+      color: "text-amber-600",
+      bg: "bg-amber-100",
+    },
+    {
+      title: "Pacientes em Reabilitação",
+      value: stats_data.active.toString(),
+      change: `Média ${stats_data.averageAge} anos`,
+      icon: Activity,
+      color: "text-teal-600",
+      bg: "bg-teal-100",
+    },
+    {
+      title: "Alta Concluída",
+      value: stats_data.completed.toString(),
+      change: "Ciclo terapêutico",
+      icon: Calendar,
+      color: "text-purple-600",
+      bg: "bg-purple-100",
+    },
+  ]
+
+  const chartData = [
+    { name: "Seg", avaliacoes: 2, atividades: 8 },
+    { name: "Ter", avaliacoes: 3, atividades: 12 },
+    { name: "Qua", avaliacoes: 2, atividades: 10 },
+    { name: "Qui", avaliacoes: 3, atividades: 14 },
+    { name: "Sex", avaliacoes: 2, atividades: 9 },
+  ]
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Bem-vindo, Dr. Ricardo</h1>
-          <p className="text-muted-foreground">Aqui está um resumo das atividades clínicas de hoje.</p>
+          <h1 className="text-3xl font-bold tracking-tight">Bem-vindo ao PCTE.ID</h1>
+          <p className="text-muted-foreground">Aqui está um resumo das atividades clínicas do seu sistema.</p>
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline">Exportar Relatórios</Button>
           <Button asChild>
-            <Link href="/patients">Novo Registro</Link>
+            <Link href="/patients">Ver Pacientes</Link>
           </Button>
         </div>
       </div>
@@ -122,25 +126,29 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              {[
-                { name: "Maria Oliveira", age: 68, status: "Motor", color: "bg-blue-500" },
-                { name: "João Santos", age: 72, status: "Cognitivo", color: "bg-purple-500" },
-                { name: "Ana Beatriz", age: 45, status: "ADL", color: "bg-teal-500" },
-                { name: "Carlos Menezes", age: 59, status: "Motor", color: "bg-blue-500" },
-              ].map((patient, i) => (
-                <div key={i} className="flex items-center justify-between group">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-2 h-10 rounded-full ${patient.color}`} />
-                    <div>
-                      <p className="text-sm font-medium leading-none">{patient.name}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{patient.age} anos • {patient.status}</p>
+              {patients.slice(0, 4).map((patient, i) => {
+                const mainDifficulty = patient.motorDifficulties.length > 0 ? "Motor" : 
+                                      patient.cognitiveDifficulties.length > 0 ? "Cognitivo" : "ADL"
+                const colors = ["bg-blue-500", "bg-purple-500", "bg-teal-500", "bg-rose-500"]
+                return (
+                  <div key={i} className="flex items-center justify-between group">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-2 h-10 rounded-full ${colors[i % colors.length]}`} />
+                      <div>
+                        <Link href={`/patients/${patient.id}`} className="text-sm font-medium leading-none hover:underline">
+                          {patient.name}
+                        </Link>
+                        <p className="text-xs text-muted-foreground mt-1">{patient.age} anos • {mainDifficulty}</p>
+                      </div>
                     </div>
+                    <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity" asChild>
+                      <Link href={`/patients/${patient.id}`}>
+                        <ArrowUpRight className="h-4 w-4" />
+                      </Link>
+                    </Button>
                   </div>
-                  <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ArrowUpRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
+                )
+              })}
             </div>
             <Button variant="link" className="w-full mt-6 text-sm" asChild>
               <Link href="/patients">Ver todos os pacientes</Link>
